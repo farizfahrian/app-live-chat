@@ -21,12 +21,12 @@ app.prepare().then(() => {
 
         socket.on('join_room', ({ room, username }) => {
             socket.join(room);
-            console.log(username + ' joined room: ' + room);
+            console.log(`${username} joined room: ${room}`);
             socket.to(room).emit('user_joined', `${username} joined room`);
         });
 
         socket.on('message', ({ room, message, sender }) => {
-            console.log(sender + 'Client sent message: ', room, message);
+            console.log(`${sender} sent message on room: ${room}, message: ${message}`);
             io.to(room).emit('message', {message, sender});
         });
 
