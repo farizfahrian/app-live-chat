@@ -20,7 +20,7 @@ const ChatForm = ({
       <input 
         type="text" 
         placeholder='Type your message' 
-        className='flex-1 rounded border border-gray-300 px-4 py-2' 
+        className='flex-1 rounded-md border border-gray-300 px-4 py-2' 
         value={message}
         onChange={(e) => setMessage(e.target.value)}
       />

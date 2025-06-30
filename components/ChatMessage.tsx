@@ -21,7 +21,7 @@ const ChatMessage = ({
                     ? 'justify-end' 
                     : 'justify-start'
             } mb-3`}>
-            <div className={`max-w-xs rounded-b-lg rounded-tl-lg rounded-tr-lg px-4 py-2 ${
+            <div className={`max-w-xs rounded-b-lg rounded-tl-lg rounded-tr-lg px-4 py-2 mt-2 ${
                 isSystemMessage 
                     ? 'bg-gray-800 text-white text-center text-xs font-semibold' 
                     : isOwnMessage 

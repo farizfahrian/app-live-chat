@@ -3,14 +3,15 @@ import React, { useEffect, useRef, useState } from "react";
 import ChatForm from "@/components/ChatForm";
 import ChatMessage from "@/components/ChatMessage";
 import { socket } from "@/lib/socketClient";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function Home() {
   const [room, setRoom] = useState<string>('');
   const [joined, setJoined] = useState<boolean>(false);
   const [messages, setMessages] = useState<{ sender: string; message: string }[]>([]);
   const [username, setUsername] = useState<string>('');
+  const [error, setError] = useState<string>('');
 
-  // 1. Create a dummy div ref for scrolling
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -29,13 +30,28 @@ export default function Home() {
   }, [joined]);
 
   useEffect(() => {
+    socket.on("username_taken", () => {
+      setError("Username taken");
+      setJoined(false)
+    });
+
+    socket.on("join_success", () => {
+      setError("");
+      setJoined(true);
+    })
+  }, []);
+
+  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const handleJoinRoom = () => {
-    if (!room || !username) return;
+    if (!room || !username) {
+      setError("Please enter a room and username");
+      return;
+    }
+    setError("");
     socket.emit("join_room", { room, username });
-    setJoined(true);
   };
 
   const handleSendMessage = (message: string) => {
@@ -70,24 +86,32 @@ export default function Home() {
               Join
             </button>
           </div>
+          {error && <p className="text-red-500">{error}</p>}
+          <div className="mt-4 p-4 bg-gray-100 rounded-lg text-sm text-gray-600">
+            <p className="font-medium mb-1">💡 How to test the chat:</p>
+            <p>1. Open this page in two different browser tabs</p>
+            <p>2. Enter different usernames and the same room name in both tabs</p>
+            <p>3. Start chatting between the tabs!</p>
+          </div>
         </div>
       ) : (
         <>
-          <div className="flex flex-col gap-2">
-            <h1 className="text-xl">Room: {room}</h1>
+          <h1 className="text-xl">Room: {room}</h1>
+          <ScrollArea className="h-96 rounded-md border whitespace-nowrap px-4 bg-gray-50">
+            <div className="space-y-3">
+              {messages.map((msg, index) => (
+                <ChatMessage
+                  key={index}
+                  sender={msg.sender}
+                  message={msg.message}
+                  isOwnMessage={msg.sender === username}
+                />
+              ))}
+              <div ref={bottomRef} />
+            </div>
+          </ScrollArea>
+          <div className="flex flex-col gap-2 mt-4">
             <ChatForm onSendMessage={handleSendMessage} />
-          </div>
-
-          <div className="h-[500px] overflow-y-auto space-y-3 p-4 m-4 bg-gray-50">
-            {messages.map((msg, index) => (
-              <ChatMessage
-                key={index}
-                sender={msg.sender}
-                message={msg.message}
-                isOwnMessage={msg.sender === username}
-              />
-            ))}
-            <div ref={bottomRef} />
           </div>
         </>
       )}
